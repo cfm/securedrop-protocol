@@ -9,8 +9,6 @@
 > RECOMMENDED, MAY, and OPTIONAL in this document are to be interpreted as
 > described in [RFC 2119].
 
-<!-- TODO: update v0.2 → v0.3
-
 ## Overview
 
 This sequence diagram shows the flow of messages and values in the SecureDrop
@@ -20,86 +18,61 @@ that describe how these values are constructed and consumed.
 ```mermaid
 sequenceDiagram
 
-actor Source
+actor S as Source
 
 box News Organization
-participant Server
-actor Journalist
-participant Newsroom
+  participant Server
+  actor J as Journalist
+  participant NR as Newsroom
 end
 
 participant FPF
 
-Note over Newsroom, FPF: 2. Newsroom setup
-activate FPF
-activate Newsroom
-Newsroom ->> FPF: NRsig,pk := newsroom's signing key
-FPF ->> Newsroom: σFPF := FPF's signature
-deactivate FPF
-activate Server
+Note over NR, FPF: 2. Newsroom setup
+NR ->> FPF: vk_{NR}^{sig}
+FPF ->> NR: σ_{FPF}
 
-Note over Journalist, Server: 3.1. Journalist enrollment
-activate Journalist
-Journalist ->> Newsroom: Jsig,pk := journalist's signing key
-Newsroom ->> Journalist: σNR := newsroom's signature on Jsig,pk
-Journalist ->> Journalist: J{fetch,dh},pk := journalist's long-term keys
-Journalist ->> Journalist: σJ := signature over J{fetch,dh},pk using Jsig,sk
-Journalist ->> Server: J{sig,fetch,dh},pk<br>σNR, σJ
-deactivate Newsroom
+Note over J, Server: 3.1 Journalist enrollment
+J ->> NR: vk_{J}^{sig}, pk_{J}^{APKE}, pk_{J}^{fetch}
+NR ->> J: σ_{NR,{J}}, σ_{J}
+NR ->> Server: register J (vk_{J}^{sig}, pk_{J}^{APKE}, pk_{J}^{fetch}, σ_{NR,{J}}, σ_{J})
 
-Note over Journalist, Server: 3.2. Setup and periodic replenishment<br>of n ephemeral keys
-loop forall n:
-Journalist ->> Server: J{edh,ekem,epke},pk := journalist's ephemeral keys<br>σJ := journalist's signature
+Note over J, Server: 3.2 Ephemeral key bundles
+loop for each i
+  J ->> Server: pk_{J,i}^{APKE_E}, pk_{J,i}^{PKE_E}, σ_{J,i}
 end
 
-Note over Source: 4. Source setup
-Source ->> Source: passphrase
+Note over S: 4. Source setup
+S ->> S: passphrase → mk → sk_{S}^{fetch}, sk_{S}^{APKE}, sk_{S}^{PKE}
 
-alt Source → Journalist
-Note over Source, Server: 5. Source fetches keys and verifies<br>their authenticity
-activate Source
-Source ->> Server: request keys for newsroom
-Server ->> Source: NRsig,pk<br>σFPF
-loop forall journalists J:
-Server ->> Source: J{sig,fetch,dh},pk<br>σNR<br>J{edh,ekem,epke},pk<br>σJ
+alt Source → Journalist (first message)
+
+  Note over S, Server: 5. Source fetches and verifies keys
+  S ->> Server: RequestKeys({NR})
+  Server ->> S: pks, sigs for all J
+
+  Note over S, Server: 6. Source submits a message
+  S ->> Server: C_{S}, X, Z
+
+  Note over Server, J: 7. Journalist fetches and decrypts
+  J ->> Server: RequestMessages({NR})
+  Server ->> J: (eid_k, Q_k) padded to max
+  J ->> Server: cid
+  Server ->> J: C_{S}
+
+else Journalist → Source (reply)
+
+  Note over J, Server: 6. Journalist submits reply
+  J ->> Server: C_{S}', X', Z'
+
+  Note over S, Server: 7. Source fetches and decrypts
+  S ->> Server: RequestMessages({NR})
+  Server ->> S: (eid'_k, Q'_k)
+  S ->> Server: cid'
+  Server ->> S: C_{S}'
+
 end
-
-Note over Source, Server: 6. Source submits a message
-loop forall journalists J:
-Source ->> Server: C := message ciphertext<br>Z := public key<br>X := Diffie-Hellman share
-end
-
-Note over Server, Journalist: 7. Journalist fetches message IDs
-Journalist ->> Server: request messages
-loop forall n  messages:
-Server ->> Journalist: Q0...n := public keys<br>cid0...n := encrypted message IDs
-end
-
-Note over Server, Journalist: 8. Journalist fetches and decrypts a message
-Journalist ->> Server: id := decrypted message ID
-Server ->> Journalist: C
-
-else Journalist → Source
-Note over Server, Journalist: 9. Journalist replies to a source
-Journalist ->> Server: C' := message ciphertext<br>Z' := public key<br>X' := Diffie-Hellman share
-
-Note over Source, Server: 7. Source fetches message IDs
-Source ->> Server: request messages
-loop forall n  messages:
-Server ->> Source: Q'0...n := public keys<br>cid'0...n := encrypted message IDs
-end
-
-Note over Source, Server: 10. Source fetches and decrypts a message
-Source ->> Server: id' := decrypted message ID
-Server ->> Source: C'<br>X'
-end
-
-deactivate Source
-deactivate Journalist
-deactivate Server
 ```
-
--->
 
 ## Key hierarchy <!-- as of 243f384 -->
 
