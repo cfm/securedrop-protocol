@@ -1,0 +1,31 @@
+name: hax
+
+on:
+  workflow_dispatch:
+  push:
+    branches: ['**']
+  pull_request:
+
+jobs:
+  run-hax:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: read
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Log in to GitHub Container Registry
+        run: echo "${{ secrets.GITHUB_TOKEN }}" |  docker login ghcr.io -u "${{ github.actor }}" --password-stdin
+
+      - name: Pull hax image
+        run: docker pull ghcr.io/cfm/hax:0.3.5
+
+      - name: Run hax in container
+        run: |
+          docker run --rm \
+            -v "${{ github.workspace }}:/workspace" \
+            -w /workspace/securedrop-protocol \
+            ghcr.io/cfm/hax:0.3.5 \
+            cargo-hax into fstar
