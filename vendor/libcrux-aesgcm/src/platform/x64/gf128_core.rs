@@ -191,8 +191,8 @@ fn reduce(high: &FieldElement, low: &FieldElement) -> FieldElement {
 #[cfg(hax)]
 fn reduce(high: &FieldElement, low: &FieldElement) -> FieldElement {
     // Under hax, we use a placeholder implementation since BitVec doesn't support bit operations
-    // This is for verification purposes only
-    hax_lib::fstar!("admit()");
+    // This is for verification purposes only and returns zero as a placeholder.
+    // TODO: Implement proper GF(2^128) reduction for hax verification
     zero()
 }
 
