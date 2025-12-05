@@ -1,9 +1,11 @@
-use core::arch::x86_64::*;
-
 use libcrux_intrinsics::avx2::{
     mm_aesenc_si128, mm_aesenclast_si128, mm_aeskeygenassist_si128, mm_loadu_si128,
     mm_setzero_si128, mm_shuffle_epi32, mm_slli_si128, mm_storeu_si128_u8, mm_xor_si128,
+    __m128i,
 };
+
+#[cfg(not(hax))]
+use core::arch::x86_64::{_mm_set_epi32, _mm_shuffle_epi32, _mm_slli_si128, _mm_storeu_si128};
 
 /// The avx2 state.
 pub(crate) type State = __m128i;
