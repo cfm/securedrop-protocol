@@ -42,6 +42,9 @@ impl libcrux_traits::kem::arrayref::Kem<DK_LEN, EK_LEN, EK_LEN, SS_LEN, DK_LEN, 
         rand: &[U8; DK_LEN],
     ) -> Result<(), libcrux_traits::kem::arrayref::KeyGenError> {
         dk.copy_from_slice(rand);
+        #[cfg(hax)]
+        clamp(dk);
+        #[cfg(not(hax))]
         clamp(dk.declassify_ref_mut());
         secret_to_public(ek, dk.declassify_ref());
         Ok(())
@@ -54,11 +57,17 @@ impl libcrux_traits::kem::arrayref::Kem<DK_LEN, EK_LEN, EK_LEN, SS_LEN, DK_LEN, 
         rand: &[U8; DK_LEN],
     ) -> Result<(), libcrux_traits::kem::arrayref::EncapsError> {
         let mut eph_dk = *rand;
+        #[cfg(hax)]
+        clamp(&mut eph_dk);
+        #[cfg(not(hax))]
         clamp(eph_dk.declassify_ref_mut());
         secret_to_public(ct, eph_dk.declassify_ref());
 
-        ecdh(ss.declassify_ref_mut(), ek, eph_dk.declassify_ref())
-            .map_err(|_| libcrux_traits::kem::arrayref::EncapsError::Unknown)
+        #[cfg(hax)]
+        let result = ecdh(ss, ek, eph_dk.declassify_ref());
+        #[cfg(not(hax))]
+        let result = ecdh(ss.declassify_ref_mut(), ek, eph_dk.declassify_ref());
+        result.map_err(|_| libcrux_traits::kem::arrayref::EncapsError::Unknown)
     }
 
     fn decaps(
@@ -66,8 +75,11 @@ impl libcrux_traits::kem::arrayref::Kem<DK_LEN, EK_LEN, EK_LEN, SS_LEN, DK_LEN, 
         ct: &[u8; DK_LEN],
         dk: &[U8; EK_LEN],
     ) -> Result<(), libcrux_traits::kem::arrayref::DecapsError> {
-        ecdh(ss.declassify_ref_mut(), ct, dk.declassify_ref())
-            .map_err(|_| libcrux_traits::kem::arrayref::DecapsError::Unknown)
+        #[cfg(hax)]
+        let result = ecdh(ss, ct, dk.declassify_ref());
+        #[cfg(not(hax))]
+        let result = ecdh(ss.declassify_ref_mut(), ct, dk.declassify_ref());
+        result.map_err(|_| libcrux_traits::kem::arrayref::DecapsError::Unknown)
     }
 }
 
