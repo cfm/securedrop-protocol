@@ -382,8 +382,6 @@ dependencies = [
 [[package]]
 name = "libcrux-hkdf"
 version = "0.0.4"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "0a8677db23061c26eef702eeb76df61b9958dd7131ab7e4175d4c06f284a5e8d"
 dependencies = [
  "libcrux-hacl-rs",
  "libcrux-hmac",
@@ -455,8 +453,6 @@ dependencies = [
 [[package]]
 name = "libcrux-p256"
 version = "0.0.4"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e80b3f061f02fdcf6faaccdffe086f5635eee7dffca7a6a818cc6321d08611e2"
 dependencies = [
  "libcrux-hacl-rs",
  "libcrux-macros",

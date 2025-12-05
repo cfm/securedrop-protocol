@@ -56,3 +56,5 @@ hax-lib = { git = "https://github.com/hacspec/hax", version = "0.3.5" }
 libcrux-curve25519 = { path = "../vendor/libcrux-curve25519" }
 libcrux-chacha20poly1305 = { path = "../vendor/libcrux-chacha20poly1305" }
 libcrux-aesgcm = { path = "../vendor/libcrux-aesgcm" }
+libcrux-hkdf = { path = "../vendor/libcrux-hkdf" }
+libcrux-p256 = { path = "../vendor/libcrux-p256" }
