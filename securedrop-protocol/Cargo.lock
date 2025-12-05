@@ -344,8 +344,6 @@ dependencies = [
 [[package]]
 name = "libcrux-curve25519"
 version = "0.0.4"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "ec11ed5555f4b204745590f71e7adff8fbbb60aae4f160ed190f6984b572895f"
 dependencies = [
  "libcrux-hacl-rs",
  "libcrux-macros",
