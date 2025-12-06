@@ -58,3 +58,4 @@ libcrux-chacha20poly1305 = { path = "../vendor/libcrux-chacha20poly1305" }
 libcrux-aesgcm = { path = "../vendor/libcrux-aesgcm" }
 libcrux-hkdf = { path = "../vendor/libcrux-hkdf" }
 libcrux-p256 = { path = "../vendor/libcrux-p256" }
+libcrux-kem = { path = "../vendor/libcrux-kem" }
