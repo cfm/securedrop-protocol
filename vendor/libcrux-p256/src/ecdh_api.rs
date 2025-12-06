@@ -35,13 +35,21 @@ impl libcrux_traits::ecdh::arrayref::EcdhArrayref<RAND_LEN, SECRET_LEN, PUBLIC_L
         secret: &[U8; SECRET_LEN],
     ) -> Result<(), libcrux_traits::ecdh::arrayref::DeriveError> {
         // `crate::p256::dh_responder` checks the validity of `public` and `private`
-        crate::p256::dh_responder(
+        #[cfg(hax)]
+        let success = crate::p256::dh_responder(
+            derived.as_mut_slice(),
+            public.as_ref(),
+            secret.declassify_ref().as_slice(),
+        );
+        #[cfg(not(hax))]
+        let success = crate::p256::dh_responder(
             derived.declassify_ref_mut().as_mut_slice(),
             public.as_ref(),
             secret.declassify_ref().as_slice(),
-        )
-        .then_some(())
-        .ok_or(libcrux_traits::ecdh::arrayref::DeriveError::Unknown)
+        );
+        success
+            .then_some(())
+            .ok_or(libcrux_traits::ecdh::arrayref::DeriveError::Unknown)
     }
 
     fn validate_secret(
